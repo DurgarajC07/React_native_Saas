@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): JsonResponse
     {
         if ($request->user()){
-            $request->user()->createAccessToken()->delete();
+            $request->user()->currentAccessToken()->delete();
         }
         return response()->json([
             'message'=> 'Logged out sucessfully'
