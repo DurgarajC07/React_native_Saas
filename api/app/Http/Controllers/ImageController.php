@@ -89,7 +89,7 @@ class ImageController extends Controller
         ]);
     }
 
-    private function deductCredits(string $operation): void
+    private function checkCredits(OperationEnum $operation): void
     {
         $user = request()->user();
         $requiredCredits = $operation->credits();
@@ -103,7 +103,7 @@ class ImageController extends Controller
         }
     }
 
-    private function deductCredits(string $operation): void
+    private function deductCredits(OperationEnum $operation): void
     {
         $user = auth()->user();
         $user->credits -= $operation->credits();
