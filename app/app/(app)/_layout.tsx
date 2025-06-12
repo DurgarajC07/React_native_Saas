@@ -36,6 +36,22 @@ const AppLayout = () => {
         backgroundColor: colors.background,
       }
     }}
-    />
+    >
+      <Stack.Screen 
+        name="(tabs)" 
+        options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="restore" 
+        options={{ headerTitle: "Restore Images" }} />
+        <Stack.Screen 
+          name="generative-fill" 
+          options={{ headerTitle: "Generative Fill" }} />
+          <Stack.Screen 
+            name="recolor" 
+            options={{ headerTitle: "Recolor Images" }} />
+             <Stack.Screen 
+                name="remove" 
+                options={{ headerTitle: "Remove Objects" }} />
+    </Stack>
   )
 }
