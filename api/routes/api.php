@@ -32,5 +32,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/image/fill', [\App\Http\Controllers\ImageController::class, 'fill'])
         ->name('image.fill');
+
+    Route::get('/image/latest-operations', [\App\Http\Controllers\ImageController::class, 'getLatestOperations'])
+        ->name('image.latest_operations');
+    
+    Route::get('/image/operation/{id}', [\App\Http\Controllers\ImageController::class, 'getOperation']);
+
+    Route::delete('/image/operation/{id}', [\App\Http\Controllers\ImageController::class, 'deleteOperation'])
+        ->name('image.delete_operation');
 });
 

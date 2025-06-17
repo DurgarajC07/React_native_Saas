@@ -51,13 +51,13 @@ const GradientCard: React.FC<GradientCardProps> = ({
           className="p-6 border border-gray-200 dark:border-gray-700"
           style={styles.gradient}
         >
-          {badgeVisible && (
-            <View className="absolute top-0 right-0 px-3 py-1 rounded-bl-2xl">
+            {badgeVisible && (
+            <View className="absolute top-0 right-0 px-3 py-1 rounded-tr-2xl rounded-bl-2xl bg-primary">
               <Text className="text-white text-sm font-semibold">
-                {badgeText}
+              {badgeText}
               </Text>
             </View>
-          )}
+            )}
           {children}
         </LinearGradient>
       </TouchableOpacity>

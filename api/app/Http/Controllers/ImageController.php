@@ -76,6 +76,84 @@ class ImageController extends Controller
         ]);
     }
 
+    public function getLatestOperations(Request $request)
+    {
+        $user = $request->user();
+        $page = $request->input('page', 1);
+        $perPage = $request->input('per_page', 10);
+
+        $operations = Image::where('user_id', $user->id)->orderBy('created_at', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+        
+        $operations->getCollection()->transform(function ($operation){
+            $operationType = $operation->operation_type;
+            $enumType = match ($operationType) {
+                'generative_fill' => OperationEnum::GENERATIVE_FILL,
+                'restore' => OperationEnum::RESTORE,
+                'recolor' => OperationEnum::RECOLOR,
+                'remove_object' => OperationEnum::REMOVE_OBJECT,
+                default => null
+            };
+
+            $operation->credits_used = $enumType ? $enumType->credits():0;
+            return $operation;
+        });
+
+        return response()->json([
+            'operations' => $operations->items(),
+            'pagination' => [
+            'total' => $operations->total(),
+            'per_page' => $operations->perPage(),
+            'current_page' => $operations->currentPage(),
+            'last_page' => $operations->lastPage(),
+            'has_more_pages' => $operations->hasMorePages(),
+            ],
+        ]);
+    }
+
+    public function getOperation($id)
+    {
+        $user = auth()->user();
+        $operation = Image::where('user_id', $user->id)->where('id', $id)->firstOrFail();
+
+        $operationType = $operation->operation_type;
+        $enumType = match ($operationType) {
+            'generative_fill' => OperationEnum::GENERATIVE_FILL,
+            'restore' => OperationEnum::RESTORE,
+            'recolor' => OperationEnum::RECOLOR,
+            'remove_object' => OperationEnum::REMOVE_OBJECT,
+            default => null
+        };
+
+        $operation->credits_used = $enumType ? $enumType->credits():0;
+
+        return response()->json([
+            'operation' => $operation
+        ]);
+    }
+
+    public function deleteOperation($id)
+    {
+        $user = auth()->user();
+        $operation = Image::where('user_id', $user->id)->where('id', $id)->firstOrFail();
+
+        try {
+            if($operation->original_image_public_id) {
+                (new \Cloudinary\Api\Admin\AdminApi())->deleteAssets(publicIds: [$operation->original_image_public_id]);
+            }
+            if($operation->generated_image_public_id) {
+                (new \Cloudinary\Api\Admin\AdminApi())->deleteAssets(publicIds: [$operation->generated_image_public_id]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete assets from Cloudinary: ' . $e->getMessage());
+        }
+        $operation->delete();
+
+        return response()->json([
+            'message' => 'Operation deleted successfully',
+        ]);
+    }
+
     private function saveImageOperation(string $originalPublicId, string $originalImageUrl, string $transformedPublicId, string $transformedImageUrl, string $operationType, array $operationMetadata = [])
     {
         Image::create([
