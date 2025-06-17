@@ -5,7 +5,7 @@ import CreditPackageCard from "@/components/app/CreditPackageCard";
 import { CreditPackage } from "@/components/app/CreditPackageCard";
 import { useThemeColors } from "@/hooks/useThemeColor";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useSession } from "@/context/AuthContext";
+import { useCredits } from "@/hooks/useCredits";
 
 const CREDIT_PACKAGES: Omit<CreditPackage, "gradient">[] = [
  {
@@ -26,7 +26,7 @@ const CREDIT_PACKAGES: Omit<CreditPackage, "gradient">[] = [
 ];
 
 function CreditsContent() {
-  const { user, isLoading } = useSession();
+  const { user, isLoading, handlePurchase } = useCredits();
   const colors = useThemeColors();
 
   return (
@@ -56,7 +56,7 @@ function CreditsContent() {
             <CreditPackageCard
               key={completePackage.credits}
               package={completePackage}
-              onPress={()=>{}}
+              onPress={handlePurchase}
               disabled={isLoading}
             />
           );

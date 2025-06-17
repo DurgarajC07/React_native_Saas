@@ -40,5 +40,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::delete('/image/operation/{id}', [\App\Http\Controllers\ImageController::class, 'deleteOperation'])
         ->name('image.delete_operation');
+
+    Route::post('/payment/create-payment-intent', [\App\Http\Controllers\PaymentController::class, 'createPaymentIntent'])
+        ->name('payment.create_payment_intent');
+    Route::post('/payment/handle-payment-success', [\App\Http\Controllers\PaymentController::class, 'handlePaymentSuccess'])
+        ->name('payment.handle_payment_success');
+
 });
 
