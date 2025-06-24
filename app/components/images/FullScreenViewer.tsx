@@ -62,7 +62,7 @@ export default function FullScreenViewer({
                   style={{ width: '100%', height: width * 1.2 }}
                   resizeMode="contain"
                 />
-                <View className="abssolute bottom-20 self-center ng-black/50 rounded-full px-3 py-1.5">
+                <View className="absolute bottom-20 self-center bg-black/50 rounded-full px-3 py-1.5">
                 <Text className="text-white">Original</Text>
                 </View>
               </View>
@@ -83,7 +83,7 @@ export default function FullScreenViewer({
 
           <View className="absolute bottom-10 left-0 right-0 flex-row justify-center">
             <View className="flex-row">
-              <View className={`w-2 h-2 ronnded-full mx-1 ${currentIndex === 0 ? 'bg-white':'bg-gray-500'}`} />
+              <View className={`w-2 h-2 rounded-full mx-1 ${currentIndex === 0 ? 'bg-white':'bg-gray-500'}`} />
               <View className={`w-2 h-2 rounded-full mx-1 ${currentIndex === 1 ? 'bg-white':'bg-gray-500'}`} />
             </View>
           </View>
