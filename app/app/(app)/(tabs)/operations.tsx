@@ -49,7 +49,7 @@ export default function Operations() {
 
     try {
       const response = await axiosInstance.get('/api/image/latest-operations', {
-        params: { page, per_page: 3 }
+        params: { page, per_page: 10 }
       });
       const  newOperations = response.data.operations;
       if (page === 1 || refresh) {

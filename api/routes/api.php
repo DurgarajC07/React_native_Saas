@@ -32,6 +32,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/image/fill', [\App\Http\Controllers\ImageController::class, 'fill'])
         ->name('image.fill');
+    Route::post('/image/restore', [\App\Http\Controllers\ImageController::class, 'restore'])
+        ->name('image.restore');
+    Route::post('/image/recolor', [\App\Http\Controllers\ImageController::class, 'recolor'])
+        ->name('image.recolor');
+    Route::post('/image/remove', [\App\Http\Controllers\ImageController::class, 'remove'])
+        ->name('image.remove');
 
     Route::get('/image/latest-operations', [\App\Http\Controllers\ImageController::class, 'getLatestOperations'])
         ->name('image.latest_operations');

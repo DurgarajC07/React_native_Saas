@@ -48,10 +48,13 @@ const AppLayout = () => {
           options={{ headerTitle: "Generative Fill" }} />
           <Stack.Screen 
             name="recolor" 
-            options={{ headerTitle: "Recolor Images" }} />
+            options={{ headerTitle: "Recolor Object" }} />
              <Stack.Screen 
                 name="remove" 
                 options={{ headerTitle: "Remove Objects" }} />
+            <Stack.Screen 
+                name="credits" 
+                options={{ headerTitle: "Credits" }} />
     </Stack>
   )
 }

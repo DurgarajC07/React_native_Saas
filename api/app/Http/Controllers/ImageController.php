@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\OperationEnum;
 use App\Models\Image;
 use Cloudinary\Api\Upload\UploadApi;
+use Cloudinary\Transformation\Adjust;
 use Cloudinary\Transformation\AspectRatio;
 use Cloudinary\Transformation\Background;
+use Cloudinary\Transformation\Effect;
+use Cloudinary\Transformation\ImproveMode;
 use Cloudinary\Transformation\Resize;
 use Cloudinary\Asset\Image as CloudinaryImage;
 use Illuminate\Http\Request;
@@ -69,10 +72,156 @@ class ImageController extends Controller
         $this->deductCredits($operation);
 
         return response()->json([
-            'message' => 'Image Uploaded and transformed sucessfully',
+            'message' => 'Image Uploaded and transformed successfully',
             'transformed_url' => $transformedImageUrl,
             'credits' => request()->user()->credits,
             'aspectRatio'=> $aspectRatio
+        ]);
+    }
+
+    public function restore(Request $request)
+    {
+        $operation = OperationEnum::RESTORE;
+        $this->checkCredits($operation);
+
+        $request->validate([
+            'image' => 'required|image|max:10240',
+        ]);
+
+        $image = $request->file('image');
+
+        
+        $originalPublicId = $image->store('uploads');
+
+        $generatedImage = (new CloudinaryImage($originalPublicId))
+        ->effect(Effect::generativeRestore())
+        ->adjust(Adjust::improve()
+            ->mode(ImproveMode::indoor())
+            ->blend(90)
+        );
+
+        $transformedImageUrl = $generatedImage->toUrl();
+
+        $uploadResult = (new UploadApi())->upload($transformedImageUrl,
+        [
+            'folder' => 'transformed/restore',
+            // 'public_id' => $image->getClientOriginalName(),
+        ]);
+
+        $uploadedImageUrl = $uploadResult['secure_url'];
+        $transformedPublicId = 'uploads/' . $uploadResult['public_id'];
+
+        $this->saveImageOperation(
+            $originalPublicId,
+            Storage::url($originalPublicId),
+            $transformedPublicId,
+            $uploadedImageUrl,
+            OperationEnum::RESTORE->value,
+        );
+
+        $this->deductCredits($operation);
+
+        return response()->json(data: [
+            'message' => 'Image restored successfully',
+            'transformed_url' => $transformedImageUrl,
+            'credits' => request()->user()->credits,
+        ]);
+    }
+
+    public function recolor(Request $request)
+    {
+        $operation = OperationEnum::RECOLOR;
+        $this->checkCredits($operation);
+
+        $request->validate([
+            'image' => 'required|image|max:10240',
+            'color' => 'string|required',
+            'target_part' => 'string|required'
+        ]);
+
+        $image = $request->file('image');
+        $color = $request->input('color');
+        $targetPart = $request->input('target_part');
+
+        $originalPublicId = $image->store('uploads');
+
+        $generatedImage = (new CloudinaryImage($originalPublicId))
+        ->effect(Effect::generativeRecolor($targetPart, $color));
+
+        $transformedImageUrl = $generatedImage->toUrl();
+
+        $uploadResult = (new UploadApi())->upload($transformedImageUrl,
+        [
+            'folder' => 'transformed/recolor',
+            // 'public_id' => $image->getClientOriginalName(),
+        ]);
+
+        $uploadedImageUrl = $uploadResult['secure_url'];
+        $transformedPublicId = 'uploads/' . $uploadResult['public_id'];
+
+        $this->saveImageOperation(
+            $originalPublicId,
+            Storage::url($originalPublicId),
+            $transformedPublicId,
+            $uploadedImageUrl,
+            OperationEnum::RECOLOR->value,
+            ['color' => $color, 'target_part' => $targetPart]
+        );
+
+        $this->deductCredits($operation);
+
+        return response()->json(data: [
+            'message' => 'Image recolored successfully',
+            'transformed_url' => $transformedImageUrl,
+            'credits' => request()->user()->credits,
+        ]);
+    }
+
+    public function remove(Request $request)
+    {
+        $operation = OperationEnum::REMOVE_OBJECT;
+        $this->checkCredits($operation);
+
+        $request->validate([
+            'image' => 'required|image|max:10240',
+            'prompt' => 'string|required',
+        ]);
+
+        $image = $request->file('image');
+        $prompt = $request->input('prompt');
+
+        $originalPublicId = $image->store('uploads');
+
+        $generatedImage = (new CloudinaryImage($originalPublicId))
+        ->effect(Effect::generativeRemove()->prompt($prompt));
+        
+
+        $transformedImageUrl = $generatedImage->toUrl();
+
+        $uploadResult = (new UploadApi())->upload($transformedImageUrl,
+        [
+            'folder' => 'transformed/remove_object',
+            // 'public_id' => $image->getClientOriginalName(),
+        ]);
+
+        $uploadedImageUrl = $uploadResult['secure_url'];
+        $transformedPublicId = 'uploads/' . $uploadResult['public_id'];
+
+        $this->saveImageOperation(
+            $originalPublicId,
+            Storage::url($originalPublicId),
+            $transformedPublicId,
+            $uploadedImageUrl,
+            OperationEnum::REMOVE_OBJECT->value,
+            ['prompt' => $prompt]
+        );
+
+        $this->deductCredits($operation);
+
+        return response()->json(data: [
+            'message' => 'Object removed successfully',
+            'transformed_url' => $transformedImageUrl,
+            'credits' => request()->user()->credits,
         ]);
     }
 
